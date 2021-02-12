@@ -5,6 +5,7 @@ window.addEventListener('DOMContentLoaded', async function(event) {
   // post data to Firestore. For best results, use square images
   // from Unsplash, e.g. https://unsplash.com/s/photos/tacos?orientation=squarish
   // Right-click and "copy image address"
+  // https://images.unsplash.com/photo-1508154048109-de555266b70a?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=3400&q=80
   // - Begin by using .querySelector to select the form
   //   element, add an event listener to the 'submit' event,
   //   and preventing the default behavior.
@@ -13,6 +14,19 @@ window.addEventListener('DOMContentLoaded', async function(event) {
   //   db.collection('posts').add(). Along withthe username and image 
   //   URL, add a "likes" field and set it to 0; we'll use this later.
   // - Verify (in Firebase) that records are being added.
+
+  let form = document.querySelector('form')
+  form.addEventListener('submit', async function(event){
+    event.preventDefault()
+
+    let username = document.querySelector(`#username`).value 
+    let imageUrl = document.querySelector(`#image-url`).value 
+    console.log(`username is ${username}`)
+    console.log(`username is ${imageUrl}`)
+    await db.collection('posts').add({username: username, imageUrl: imageUrl, likes: 0})
+
+
+  })
   
   // Step 2: Read existing posts from Firestore and display them
   // when the page is loaded
@@ -40,7 +54,50 @@ window.addEventListener('DOMContentLoaded', async function(event) {
   //       </div>
   //     </div>
   //   `)
+  let postSnapshot = await db.collection('posts').get()
+  //note: 'posts' is the name of the database in firebase
   
+  let posts = postSnapshot.docs
+
+  for (i = 0; i < pposts.lenth; i++) {
+    let post = posts[i]
+    let postId = post.postId
+    let postData = post.data()
+    let postUsername = postData.username
+    let postImageUrl = postData.imageUrl
+    // console.log(postUsername)
+    // console.log(postImageUrl)
+    
+    document.querySelector('.posts').insertAdjacentHTML('beforeend', `
+      <div class="md:mt-16 mt-8 space-y-8">
+        <div class="md:mx-0 mx-4">
+          <span class="font-bold text-xl">${postUsername}</span>
+        </div>
+  
+        <div>
+          <img src="${postImageUrl}" class="w-full">
+        </div>
+   
+        <div class="text-3xl md:mx-0 mx-4">
+          <button class="like-button">❤️</button>
+          <span class="likes">0</span>
+        </div>
+      </div>
+    `)
+
+
+
+
+  }
+  
+
+
+
+
+
+
+
+
   // Step 3: Implement the "like" button
   // - In the code we wrote for Step 2, attach an event listener to
   //   every "like-button".
